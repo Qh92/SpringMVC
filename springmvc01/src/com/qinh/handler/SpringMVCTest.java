@@ -259,6 +259,43 @@ public class SpringMVCTest {
     /**
      * 由@ModelAttribute 标记的方法，会在每个目标方法执行之前被SpringMVC调用！！！
      *
+     * 运行流程:
+     * 1. 执行@ModelAttribu注解修饰的方法：从数据库中取出对象，把对象放入到Map中，键为：user
+     * 2. SpringMVC 从Map中取出User对象，并把表单的请求参数赋给该User对象的对应属性
+     * 3. SpringMVC 把上述对象传入目标方法的参数
+     *
+     * 注意：在@ModelAttribute修饰的方法中，放入到Map时的键需要和目标方法入参类型的第一个字母小写的字符串一致！！
+     *
+     * SpringMVC 确定目标方法 POJO 类型入参的过程
+     * 1. 确定一个 key:
+     * 1). 若目标方法的 POJO 类型的参数木有使用 @ModelAttribute 作为修饰, 则 key 为 POJO 类名第一个字母的小写
+     * 2). 若使用了  @ModelAttribute 来修饰, 则 key 为 @ModelAttribute 注解的 value 属性值.
+     * 2. 在 implicitModel 中查找 key 对应的对象, 若存在, 则作为入参传入
+     * 1). 若在 @ModelAttribute 标记的方法中在 Map 中保存过, 且 key 和 1 确定的 key 一致, 则会获取到.
+     * 3. 若 implicitModel 中不存在 key 对应的对象, 则检查当前的 Handler 是否使用 @SessionAttributes 注解修饰,
+     * 若使用了该注解, 且 @SessionAttributes 注解的 value 属性值中包含了 key, 则会从 HttpSession 中来获取 key 所
+     * 对应的 value 值, 若存在则直接传入到目标方法的入参中. 若不存在则将抛出异常.
+     * 4. 若 Handler 没有标识 @SessionAttributes 注解或 @SessionAttributes 注解的 value 值中不包含 key, 则
+     * 会通过反射来创建 POJO 类型的参数, 传入为目标方法的参数
+     * 5. SpringMVC 会把 key 和 POJO 类型的对象保存到 implicitModel 中, 进而会保存到 request 中.
+     *
+     * 源码分析的流程：
+     * 1. 调用@ModelAttribu注解修饰的方法。实际上把@ModelAttribute方法中Map中的数据放在了implicitModel中
+     * 2. 解析请求处理器的目标参数，实际上该目标参数来自于WebDataBinder对象的target属性
+     * 1). 创建WebDataBinder对象：
+     * ①. 确定objectName属性：若传入的attrName属性值为"",则objectName为类名第一个字母小写。
+     * *注意： attrName.若目标方法的POJO属性使用了@ModelAttribu来修饰，则attrName值即为@ModelAttribu的value属性值
+     *
+     * ②. 确定target属性：
+     *  > 在implicitModel中查找attrName对象的属性值。若存在，ok
+     *  > *若不存在：则验证当前Handler是否使用了@SessionAttributes进行修饰，若使用了，则尝试从Session中获取attrName所对应的属性值。若session中没有对应的属性值，则抛出异常。
+     *  > *若Handler没有使用@SessionAttributes进行修饰，或@SessionAttributes中没有使用value值指定的key和attrName相匹配，则通过反射创建了POJO对象
+     *
+     * 2). SpringMVC把表单的请求参数赋给了WebDataBinder的target对应的属性
+     * 3). *SpringMVC 会把WebDataBinder的attrName和target给到implicitModel，进而传到request域对象中
+     * 4). 把WebDataBinder的target作为参数传递给目标方法的入参
+     *
+     *
      * @param user
      * @return
      */
@@ -270,12 +307,10 @@ public class SpringMVCTest {
 
 
     /**
-     * 运行流程:
-     * 1. 执行@ModelAttribu注解修饰的方法：从数据库中取出对象，把对象放入到Map中，键为：user
-     * 2. SpringMVC 从Map中取出User对象，并把表单的请求参数赋给该User对象的对应属性
-     * 3. SpringMVC 把上述对象传入目标方法的参数
-     *
-     * 注意：在@ModelAttribute修饰的方法中，放入到Map时的键需要和目标方法入参类型的第一个字母小写的字符串一致！！
+     * 1. 有 @ModelAttribute 标记的方法, 会在每个目标方法执行之前被 SpringMVC 调用!
+     * 2. @ModelAttribute 注解也可以来修饰目标方法 POJO 类型的入参, 其 value 属性值有如下的作用:
+     * 1). SpringMVC 会使用 value 属性值在 implicitModel 中查找对应的对象, 若存在则会直接传入到目标方法的入参中.
+     * 2). SpringMVC 会一 value 为 key, POJO 类型的对象为 value, 存入到 request 中.
      *
      * @param id
      * @param map
@@ -288,6 +323,55 @@ public class SpringMVCTest {
             System.out.println("从数据库中获取一个对象 : " + user);
             map.put("user",user);
         }
-
     }
+
+
+
+    @RequestMapping("/testViewAndViewResolver")
+    public String testViewAndViewResolver(){
+        System.out.println("testViewAndViewResolver");
+        return SUCCESS;
+    }
+
+
+    /**
+     * 我们知道如果return 语句中这样写return "list"; 表示进入视图解析器添加前缀和后缀找到对应的文件 
+     *
+     * 最后变成/WEB-INF/views/list.jsp
+     *
+     * 但是如果return 中是请求转发的方式呢？
+     *
+     * 例如return "redirect:/list";
+     *
+     * return中使用redirect方式或者forward 方式(return "forward:/list";) 都不会进入视图解析器中解析，而是通过请求转发的方式进行传输。
+     * 而这样情况又分两种①return "redirect:/list"; ②return "redirect:/list.jsp";
+     *
+     * 第一种方式，会重定向controller中@RequestMapping("/list")对应的处理器进行处理
+     *
+     * 第二种方式，则会进入webapp/根目录下面去寻找一个list.jsp的文件并响应
+     *
+     * forward方式同理
+     *
+     *
+     * @return
+     */
+    @RequestMapping("/testView")
+    public String testView(){
+        System.out.println("testView");
+        return "helloView";
+    }
+
+    @RequestMapping("/testRedirect")
+    public String testRedirect(){
+        System.out.println("testRedirect");
+        return "redirect:/index.jsp";
+    }
+
+    @RequestMapping("/testForward")
+    public String testForward(){
+        System.out.println("testForward");
+        return "forward:/index.jsp";
+    }
+
+
 }

@@ -23,10 +23,10 @@
             实际上也可以不通过contextConfigLocation 来配置SpringMVC的配置文件，而使用默认的配置文件
             默认的配置文件为：/WEB-INF/<servlet-name>=servlet.xml
         -->
-        <!--<init-param>
+        <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>classpath:springmvc.xml</param-value>
-        </init-param>-->
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>

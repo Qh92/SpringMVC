@@ -5,7 +5,7 @@
   Time: 13:35
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java"  isErrorPage="true" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java"   %>
 <html>
   <head>
     <title>$Title$</title>
@@ -67,6 +67,7 @@
 
   <a href="springmvc/testSessionAttributes"> test SessionAttributes</a> <br/>
 
+
   <%--
     模拟修改操作
     1. 原始数据为：1,Tom,123456,xx@gmail.com,12
@@ -81,6 +82,15 @@
     age: <input type="text" name="age" value="12"> <br/>
     <input type="submit" value="submit">
   </form> <br/>
+
+
+  <a href="springmvc/testViewAndViewResolver"> test ViewAndViewResolver</a> <br/>
+
+  <a href="springmvc/testView"> test  View</a> <br/>
+
+  <a href="springmvc/testRedirect"> test  Redirect</a> <br/>
+
+  <a href="springmvc/testForward"> test  Forward</a> <br/>
 
 
   </body>
