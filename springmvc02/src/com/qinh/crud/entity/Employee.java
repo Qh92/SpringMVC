@@ -1,25 +1,32 @@
 package com.qinh.crud.entity;
 
-import java.util.Date;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.NumberFormat;
+
+import javax.validation.constraints.Past;
+import java.sql.Date;
 
 public class Employee {
 
 	private Integer id;
-	//@NotEmpty
+	@NotEmpty
 	private String lastName;
 
-	//@Email
+	@Email
 	private String email;
 	//1 male, 0 female
 	private Integer gender;
 	
 	private Department department;
 	
-	//@Past
-	//@DateTimeFormat(pattern="yyyy-MM-dd")
+	@Past
+	@DateTimeFormat(pattern="yyyy-MM-dd")
 	private Date birth;
+	//private String birth;
 	
-	//@NumberFormat(pattern="#,###,###.#")
+	@NumberFormat(pattern="#,###,###.#")
 	private Float salary;
 
 	public Integer getId() {
@@ -69,6 +76,14 @@ public class Employee {
 	public void setBirth(Date birth) {
 		this.birth = birth;
 	}
+
+	/*public String getBirth() {
+		return birth;
+	}
+
+	public void setBirth(String birth) {
+		this.birth = birth;
+	}*/
 
 	public Float getSalary() {
 		return salary;
