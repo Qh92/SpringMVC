@@ -66,5 +66,18 @@
     </form>
     <br/>
 
+
+    <br/>
+    <a href="testExceptionHandlerExceptionResolver?i=10">Test ExceptionHandlerExceptionResolver</a>
+
+    <br/>
+    <a href="testResponseStatusExceptionResolver?i=10">Test ResponseStatusExceptionResolver</a>
+
+    <br/>
+    <a href="testDefaultHandlerExceptionResolver">Test DefaultHandlerExceptionResolver</a>
+
+    <br/>
+    <a href="testSimpleMappingExceptionResolver?i=2">Test SimpleMappingExceptionResolver</a>
+
   </body>
 </html>
