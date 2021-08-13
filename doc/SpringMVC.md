@@ -47,11 +47,52 @@ Spring 为展现层提供的基于 MVC 设计理念的优秀的 Web 框架，是
 
 #### 2.在 web.xml 中配置 DispatcherServlet
 
-配置 DispatcherServlet ：DispatcherServlet 默认加载 /WEB-INF/<servletName-servlet>.xml 的 Spring 配置文件, 启动 WEB 层 的 Spring 容器。可以通过 contextConfigLocation 初始化参数自定
-义配置文件的位置和名称
+配置 DispatcherServlet ：DispatcherServlet 默认加载 /WEB-INF/<servletName-servlet>.xml 的 Spring 配置文件, 启动 WEB 层 的 Spring 容器。可以通过 contextConfigLocation 初始化参数自定义配置文件的位置和名称
 
 ```xml
+<!-- 配置DispatcherServlet -->
+    <servlet>
+        <servlet-name>springDispatcherServlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- 配置DispatcherServlet的一个初始化参数，配置SpringMVC配置文件的位置和名称 -->
+        <!--
+            实际上也可以不通过contextConfigLocation 来配置SpringMVC的配置文件，而使用默认的配置文件
+            默认的配置文件为：/WEB-INF/<servlet-name>-servlet.xml
+        -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:springmvc.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>springDispatcherServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+```
 
+配置路径时 /和/*的区别
+
+```
+其中/和/*的区别：
+< url-pattern > / </ url-pattern >   不会匹配到*.jsp，即：*.jsp不会进入spring的 DispatcherServlet类 。
+< url-pattern > /* </ url-pattern > 会匹配*.jsp，会出现返回jsp视图时再次进入spring的DispatcherServlet 类，导致找不到对应的controller所以报404错。
+
+总之，关于web.xml的url映射的小知识:
+< url-pattern>/</url-pattern>  会匹配到/login这样的路径型url，不会匹配到模式为*.jsp这样的后缀型url
+< url-pattern>/*</url-pattern> 会匹配所有url：路径型的和后缀型的url(包括/login,*.jsp,*.js和*.html等)
+
+1. 首先/这个是表示默认的路径，及表示：当没有找到可以匹配的URL就用这个URL去匹配。
+2. 在springmvc中可以配置多个DispatcherServlet，比如： 配置多个DispatcherServlet有/和/*，先匹配的是/*这个
+
+3. 当配置相同的情况下，DispathcherServlet配置成/和/*的区别
+<一>　/：使用/配置路径，直接访问到jsp，不经springDispatcherServlet
+<二>　/*：配置/*路径，不能访问到多视图的jsp
+当我在客户端调用URL：/user/list然后返回user.jsp视图，当配置的是/：DispathcherServlet拿到这个请求然后返回对应的controller，然后依据Dispather Type为Forward类型转发到user.jsp视图，即就是请求user.jsp视图(/user/user.jsp)，此时Dispather没有拦截/user/user.jsp，
+因为此时你配置的是默认的/，就顺利的交给ModleAndView去处理显示了。
+当配置的是/*：DispathcherServlet拿到这个请求然后返回对应的controller，然后通过Dispather Type通过Forward转发到user.jsp视图，即就是请求user.jsp视图(/user/user.jsp)，此时Dispather已经拦截/user/user.jsp，Dispatcher会把他当作Controller去匹配，没有匹配到就会报404错误。
+
+结论：/ 能匹配路径型URL，不能匹配后缀型URL /* 能匹配任何类型URL，在配置视图的时候尽量用/这种方式。
 ```
 
 
@@ -178,7 +219,7 @@ Ant 风格资源地址支持 3 种匹配符：
 
 – !param1: 表示请求不能包含名为 param1 的请求参数 
 
-– param1 != value1: 表示请求包含名为 param1 的请求参数，但其值 不能为 value1 
+– param1 != value1: 表示请求包含名为 param1 的请求参数，但其值不能为 value1 
 
 – {“param1=value1”, “param2”}: 请求必须包含名为 param1 和param2  的两个请求参数，且 param1 参数的值必须为 value1
 
@@ -231,7 +272,7 @@ REST：即 Representational State Transfer。（资源）表现层状态转化�
 
 表现层（Representation）：把资源具体呈现出来的形式，叫做它的表现层 （Representation）。比如，文本可以用 txt 格式表现，也可以用 HTML 格 式、XML 格式、JSON 格式表现，甚至可以采用二进制格式。 
 
-状态转化（State Transfer）：每发出一个请求，就代表了客户端和服务器的一 次交互过程。HTTP协议，是一个无状态协议，即所有的状态都保存在服务器 端。因此，如果客户端想要操作服务器，必须通过某种手段，让服务器端发生“ 状态转化”（State Transfer）。而这种转化是建立在表现层之上的，所以就是 “ 表现层状态转化”。具体说，就是 HTTP 协议里面，四个表示操作方式的动 词：GET、POST、PUT、DELETE。它们分别对应四种基本操作：GET 用来获 取资源，POST 用来新建资源，PUT 用来更新资源，DELETE 用来删除资源。
+状态转化（State Transfer）：每发出一个请求，就代表了客户端和服务器的一 次交互过程。HTTP协议，是一个无状态协议，即所有的状态都保存在服务器 端。因此，如果客户端想要操作服务器，必须通过某种手段，让服务器端发生“ 状态转化”（State Transfer）。而这种转化是建立在表现层之上的，所以就是 “ 表现层状态转化”。具体说，就是 HTTP 协议里面，四个表示操作方式的动 词：GET、POST、PUT、DELETE。它们分别对应四种基本操作：GET 用来获取资源，POST 用来新建资源，PUT 用来更新资源，DELETE 用来删除资源。
 
 
 
@@ -319,7 +360,7 @@ REST：即 Representational State Transfer。（资源）表现层状态转化�
 
 ### 1.请求处理方法签名 
 
-• Spring MVC 通过分析处理方法的签名，将 HTTP 请求信 息绑定到处理方法的相应人参中。 
+• Spring MVC 通过分析处理方法的签名，将 HTTP 请求信 息绑定到处理方法的相应入参中。 
 
 • Spring MVC 对控制器处理方法签名的限制是很宽松的， 几乎可以按喜欢的任何方式对方法进行签名。 
 
@@ -336,6 +377,12 @@ MVC 框架会将 HTTP 请求的信息绑定到相应的方法入参 中，并根
 – value：参数名 
 
 – required：是否必须。默认为 true, 表示请求参数中必须包含对应的参数，若不存在，将抛出异常
+
+```jsp
+<a href="springmvc/testRequestParam?username=qinhao&age=11"> test RequestParam</a> <br/>
+```
+
+
 
 ```java
 	/**
@@ -497,7 +544,7 @@ public class Address {
 
 – ModelAndView: 处理方法返回值类型为 ModelAndView 时, 方法体即可通过该对象添加模型数据 
 
-– Map 及 Model: 入参为 org.springframework.ui.Model、org.springframework.ui. ModelMap 或 java.uti.Map 时，处理方法返回时，Map  中的数据会自动添加到模型中。 
+– Map 及 Model: 入参为 org.springframework.ui.Model、org.springframework.ui. ModelMap 或 java.uti.Map 时，处理方法返回时，Map中的数据会自动添加到模型中。 
 
 – @SessionAttributes: 将模型中的某个属性暂存到 HttpSession 中，以便多个请求之间可以共享这个属性 
 
@@ -914,3 +961,192 @@ Excel 视图
 – redirect:success.jsp：会完成一个到 success.jsp 的重定向的操作 
 
 – forward:success.jsp：会完成一个到 success.jsp 的转发操作
+
+
+
+## 七、RESTful CRUD
+
+1.新增：/order  POST
+
+2.删除：/order/1 DELETE    delete?id=1
+
+3.修改：/order/1 PUT       update?id=1
+
+4.查询：/order/1 GET       get?id=1
+
+```
+如何发送PUT请求和DELETE请求呢？
+1. 需要配置HiddenHttpMethodFilter
+2. 需要发送POST
+3. 需要在发送POST请求时携带一个name="_method"的隐藏域，值为DELETE或PUT
+在SpringMVC的目标方法中如何得到id呢？
+使用@PathVariable注解
+```
+
+```xml
+<!-- 配置org.springframework.web.filter.HiddenHttpMethodFilter：可以把POST请求转为DELETE或PUT请求-->
+<filter>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+测试代码：
+
+```jsp
+<a href="springmvc/testRest/1"> test Rest Get</a> <br/>
+
+<form action="springmvc/testRest" method="post">
+  <input type="submit" value="TestRest POST">
+</form> <br/>
+
+<form action="springmvc/testRest/1" method="post">
+  <input type="hidden" name="_method" value="DELETE">
+  <input type="submit" value="TestRest DELETE">
+</form> <br/>
+
+<form action="springmvc/testRest/1" method="post">
+  <input type="hidden" name="_method" value="PUT">
+  <input type="submit" value="TestRest PUT">
+</form> <br/>
+```
+
+
+
+```java
+@RequestMapping(value = "/testRest/{id}" ,method = RequestMethod.GET)
+public String testRest(@PathVariable Integer id){
+    System.out.println("testRest GET : " + id);
+    return SUCCESS;
+}
+
+
+@RequestMapping(value = "/testRest" ,method = RequestMethod.POST)
+public String testRest(){
+    System.out.println("testRest POST ");
+    return SUCCESS;
+}
+
+@RequestMapping(value = "/testRest/{id}" ,method = RequestMethod.DELETE)
+public String testRestDelete(@PathVariable Integer id){
+    System.out.println("testRest DELETE : " + id);
+    return "redirect:/springmvc/testRest/1";
+}
+
+@RequestMapping(value = "/testRest/{id}" ,method = RequestMethod.PUT)
+public String testRestPut(@PathVariable Integer id){
+    System.out.println("testRest PUT : " + id);
+    return "redirect:/springmvc/testRest/1";
+}
+```
+
+
+
+## 八、SpringMVC表单标签&处理静态资源
+
+### SpringMVC表单标签
+
+通过 SpringMVC 的表单标签可以实现将模型数据 中的属性和 HTML表单元素相绑定，以实现表单数据更便捷编辑和表单值的回显
+
+1.form 标签
+
+1)一般情况下，通过 GET 请求获取表单页面，而通过POST 请求提交表单页面，因此获取表单页面和提交表单 页面的 URL 是相同的。只要满足该最佳条件的契 约，<form:form> 标签就无需通过 action 属性指定表单提交的 URL 
+
+2)可以通过 modelAttribute 属性指定绑定的模型属性，若没有指定该属性，则默认从 request 域对象中读取 command 的表单 bean，如果该属性值也不存在，则会发生错误
+
+2.表单标签
+
+SpringMVC 提供了多个表单组件标签，如 <form:input/>、<form:select/> 等，用以绑定表单字段的属性值，它们的共有属性如下： 
+
+– path：表单字段，对应 html 元素的 name 属性，支持级联属性 
+
+– htmlEscape：是否对表单值的 HTML 特殊字符进行转换，默认值为 true 
+
+– cssClass：表单组件对应的 CSS 样式类名 
+
+– cssErrorClass：表单组件的数据存在错误时，采取的 CSS 样式
+
+form:input、form:password、form:hidden、form:textarea ：对应 HTML 表单的 text、password、hidden、textarea 
+
+标签 
+
+form:radiobutton：单选框组件标签，当表单 bean 对应的属性值和 value 值相等时，单选框被选中 
+
+form:radiobuttons：单选框组标签，用于构造多个单选框
+
+– items：可以是一个 List、String[] 或 Map 
+
+– itemValue：指定 radio 的 value 值。可以是集合中 bean 的一个属性值 
+
+– itemLabel：指定 radio 的 label 值 
+
+– delimiter：多个单选框可以通过 delimiter 指定分隔符
+
+form:checkbox：复选框组件。用于构造单个复选框 
+
+form:checkboxs：用于构造多个复选框。使用方式同 
+
+form:radiobuttons 标签 
+
+form:select：用于构造下拉框组件。使用方式同 
+
+form:radiobuttons 标签 
+
+form:option：下拉框选项组件标签。使用方式同 
+
+form:radiobuttons 标签 
+
+form:errors：显示表单组件或数据校验所对应的错误 
+
+– <form:errors path= “ *” /> ：显示表单所有的错误 
+
+– <form:errors path= “ user*” /> ：显示所有以 user 为前缀的属性对应的错误 
+
+– <form:errors path= “ username” /> ：显示特定表单对象属性的错误
+
+
+
+### 处理静态资源
+
+优雅的 REST 风格的资源URL 不希望带 .html 或 .do 等后缀 
+
+• 若将 DispatcherServlet 请求映射配置为 /，则 Spring MVC 将捕获WEB 容器的所有请求，包括静态资源的请求， SpringMVC 会将他 们当成一个普通请求处理，因找不到对应处理器将导致错误。 
+
+• 可以在 SpringMVC 的配置文件中配置 <mvc:default-servlet-handler/> 的方式解决静态资源的问题： 
+
+– <mvc:default-servlet-handler/> 将在 SpringMVC 上下文中定义一个DefaultServletHttpRequestHandler，它会对进入 DispatcherServlet 的请求进行筛查，如果发现是没有经过映射的请求，就将该请求交由 WEB 应用服务器默认的 Servlet 处理，如果不是静态资源的请求，才由DispatcherServlet 继续处理 
+
+– 一般 WEB 应用服务器默认的 Servlet 的名称都是 default。若所使用的WEB 服务器的默认 Servlet 名称不是 default，则需要通过 default-servlet-name 属性显式指定
+
+小结：
+
+< url-pattern > / </ url-pattern > 可以匹配路径型的url，如/login，但是不会匹配*.jsp这种带有后缀的url，所以访问login.jsp这种url时不会进入Spring的dispatcherServlet类。
+
+而< url-pattern > /* </ url-pattern > 可以匹配*.jsp这种url，所以会出现返回jsp视图时再次进入dispatcherServlet类，导致找不到对应controller而报404的错误
+
+< url-pattern>/</url-pattern>  会匹配到/login这样的路径型url，不会匹配到模式为*.jsp这样的后缀型url
+< url-pattern>/*</url-pattern> 会匹配所有url：路径型的和后缀型的url(包括/login,*.jsp,*.js和*.html等)
+
+
+
+## 九、数据转换 & 数据格式化 & 数据校验
+
+### 数据绑定流程
+
+1. Spring MVC 主框架将 ServletRequest 对象及目标方法的入参实例传递给 WebDataBinderFactory 实例，以创建 DataBinder 实例对象 
+
+2. DataBinder 调用装配在 Spring MVC 上下文中的ConversionService 组件进行数据类型转换、数据格式化工作。将 Servlet 中的请求信息填充到入参对象中 
+
+3. 调用 Validator 组件对已经绑定了请求消息的入参对象进行数据合法性校验，并最终生成数据绑定结果BindingData 对象 
+
+4. Spring MVC 抽取 BindingResult 中的入参对象和校验错误对象，将它们赋给处理方法的响应入参
+
+5. Spring MVC 通过反射机制对目标处理方法进行解析，将请求消息绑定到处理方法的入参中。数据绑定的核心部件是 
+
+   DataBinder，运行机制如下：
+
+   ![1628845067776](assets\1628845067776.png)

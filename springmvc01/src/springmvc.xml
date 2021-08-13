@@ -33,6 +33,7 @@
     <mvc:view-controller path="/success" view-name="success"/>
 
     <!-- 在实际开发中通常都需要配置 mvc:annotation-driven 标签 -->
+    <!--注解驱动，以使得访问路径与方法的匹配可以通过注解配置-->
     <mvc:annotation-driven/>
 
 

@@ -1,7 +1,9 @@
 package com.qinh.handler;
 
 import com.qinh.entity.User;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -52,7 +54,7 @@ public class SpringMVCTest {
     }
 
     /**
-     * 了解：可以使用parmas 和 headers 来更加精确的映射请求。params和headers支持简单的表达式
+     * 了解：可以使用params 和 headers 来更加精确的映射请求。params和headers支持简单的表达式
      *
      * @return
      */
@@ -232,6 +234,7 @@ public class SpringMVCTest {
      */
     @RequestMapping("/testMap")
     public String testMap(Map<String,Object> map){
+        //org.springframework.validation.support.BindingAwareModelMap
         System.out.println(map.getClass().getName());
         map.put("names", Arrays.asList("Tom","Jerry","Mike"));
         return SUCCESS;
