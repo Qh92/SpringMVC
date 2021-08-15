@@ -1122,16 +1122,29 @@ form:errors：显示表单组件或数据校验所对应的错误
 
 – 一般 WEB 应用服务器默认的 Servlet 的名称都是 default。若所使用的WEB 服务器的默认 Servlet 名称不是 default，则需要通过 default-servlet-name 属性显式指定
 
-小结：
+其中/和/*的区别：
+< url-pattern > / </ url-pattern >  不会匹配到*.jsp，即：*.jsp不会进入spring的 DispatcherServlet类 。
+< url-pattern > /* </ url-pattern > 会匹配*.jsp，会出现返回jsp视图时再次进入spring的DispatcherServlet 类，导致找不到对应的controller所以报404错。
 
-< url-pattern > / </ url-pattern > 可以匹配路径型的url，如/login，但是不会匹配*.jsp这种带有后缀的url，所以访问login.jsp这种url时不会进入Spring的dispatcherServlet类。
-
-而< url-pattern > /* </ url-pattern > 可以匹配*.jsp这种url，所以会出现返回jsp视图时再次进入dispatcherServlet类，导致找不到对应controller而报404的错误
-
+总之，关于web.xml的url映射的小知识:
 < url-pattern>/</url-pattern>  会匹配到/login这样的路径型url，不会匹配到模式为*.jsp这样的后缀型url
 < url-pattern>/*</url-pattern> 会匹配所有url：路径型的和后缀型的url(包括/login,*.jsp,*.js和*.html等)
 
+```
+1. 首先/这个是表示默认的路径，及表示：当没有找到可以匹配的URL就用这个URL去匹配。
+2. 在springmvc中可以配置多个DispatcherServlet，比如： 配置多个DispatcherServlet有/和/*，先匹配的是/*这个
 
+3. 当配置相同的情况下，DispathcherServlet配置成/和/*的区别
+<一>　/：使用/配置路径，直接访问到jsp，不经springDispatcherServlet
+<二>　/*：配置/*路径，不能访问到多视图的jsp
+当我在客户端调用URL：/user/list然后返回user.jsp视图，当配置的是/：DispathcherServlet拿到这个请求然后返回对应的controller，
+然后依据Dispather Type为Forward类型转发到user.jsp视图，即就是请求user.jsp视图(/user/user.jsp)，此时Dispather没有拦截/user/user.jsp，
+因为此时你配置的是默认的/，就顺利的交给ModleAndView去处理显示了。
+当配置的是/*：DispathcherServlet拿到这个请求然后返回对应的controller，然后通过Dispather Type通过Forward转发到user.jsp视图，
+即就是请求user.jsp视图(/user/user.jsp)，此时Dispather已经拦截/user/user.jsp，Dispatcher会把他当作Controller去匹配，没有匹配到就会报404错误。
+
+结论：/ 能匹配路径型URL，不能匹配后缀型URL /* 能匹配任何类型URL，在配置视图的时候尽量用/这种方式。
+```
 
 ## 九、数据转换 & 数据格式化 & 数据校验
 
