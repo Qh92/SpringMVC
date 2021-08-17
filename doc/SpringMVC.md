@@ -1163,3 +1163,92 @@ form:errors：显示表单组件或数据校验所对应的错误
    DataBinder，运行机制如下：
 
    ![1628845067776](assets\1628845067776.png)
+
+自定义类型转换器：
+
+```xml
+<!-- 在实际开发中通常都需要配置 mvc:annotation-driven 标签 -->
+<mvc:annotation-driven conversion-service="conversionService"/>
+
+<!-- 配置ConversionService -->
+<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+    <property name="converters">
+        <set>
+            <ref bean="employeeConverter"/>
+        </set>
+    </property>
+</bean>
+```
+
+
+
+```jsp
+<form action="testConversionServiceConverter" method="post">
+    <%-- lastname-email-gender-department.id  例如: GG-gg@gmail.com-0-105 --%>
+    Employee: <input type="text" name="employee">
+    <input type="submit" value="submit" />
+</form>
+```
+
+
+
+```java
+@RequestMapping("/testConversionServiceConverter")
+public String testConverter(@RequestParam("employee")Employee employee){
+    System.out.println(" save employee : " + employee);
+    employeeDao.save(employee);
+    return "redirect:/emps";
+}
+
+@Component
+public class EmployeeConverter implements Converter<String, Employee> {
+
+    @Override
+    public Employee convert(String s) {
+        if (s != null){
+            String[] values = s.split("-");
+            if (values != null && values.length == 4){
+                String lastName = values[0];
+                String email = values[1];
+                Integer gender = Integer.parseInt(values[2]);
+                Department department = new Department();
+                department.setId(Integer.parseInt(values[3]));
+                Employee employee = new Employee(null, lastName, email, gender, department);
+                System.out.println(s + "--convert--" + employee);
+                return employee;
+            }
+        }
+        return null;
+    }
+}
+```
+
+
+
+Spring 支持的转换器 
+
+Spring 定义了 3 种类型的转换器接口，实现任意一个转换器接口都可以作为自定义转换器注册到 ConversionServiceFactroyBean 中： 
+
+– Converter<S,T>：将 S 类型对象转为 T 类型对象 
+
+– ConverterFactory：将相同系列多个 “同质” Converter 封装在一起。如果希望将一种类型的对象转换为另一种类型及其子类的对象（例如将 String 转换为 Number 及 Number 子类（Integer、Long、Double 等）对象）可使用该转换器工厂类 
+
+– GenericConverter：会根据源类对象及目标类对象所在的宿主类中的上下文信息进行类型转换
+
+
+
+关于 mvc:annotation-driven 
+
+• <mvc:annotation-driven /> 会自动注册RequestMappingHandlerMapping 、RequestMappingHandlerAdapter 与 
+
+ExceptionHandlerExceptionResolver 三个bean。 
+
+• 还将提供以下支持： 
+
+– 支持使用 ConversionService 实例对表单参数进行类型转换 
+
+– 支持使用 @NumberFormat annotation、@DateTimeFormat注解完成数据类型的格式化 
+
+– 支持使用 @Valid 注解对 JavaBean 实例进行 JSR 303 验证 
+
+– 支持使用 @RequestBody 和 @ResponseBody 注解
