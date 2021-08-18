@@ -140,6 +140,125 @@ protected final void initServletBean() throws ServletException {
 
 
 
+FrameworkServlet#initWebApplicationContext()
+
+```java
+protected WebApplicationContext initWebApplicationContext() {
+		WebApplicationContext rootContext =
+				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+		WebApplicationContext wac = null;
+
+		if (this.webApplicationContext != null) {
+			// A context instance was injected at construction time -> use it
+			wac = this.webApplicationContext;
+			if (wac instanceof ConfigurableWebApplicationContext) {
+				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) wac;
+				if (!cwac.isActive()) {
+					// The context has not yet been refreshed -> provide services such as
+					// setting the parent context, setting the application context id, etc
+					if (cwac.getParent() == null) {
+						// The context instance was injected without an explicit parent -> set
+						// the root application context (if any; may be null) as the parent
+						cwac.setParent(rootContext);
+					}
+					configureAndRefreshWebApplicationContext(cwac);
+				}
+			}
+		}
+		if (wac == null) {
+			// No context instance was injected at construction time -> see if one
+			// has been registered in the servlet context. If one exists, it is assumed
+			// that the parent context (if any) has already been set and that the
+			// user has performed any initialization such as setting the context id
+			wac = findWebApplicationContext();
+		}
+		if (wac == null) {
+			// No context instance is defined for this servlet -> create a local one
+			wac = createWebApplicationContext(rootContext);
+		}
+
+		if (!this.refreshEventReceived) {
+			// Either the context is not a ConfigurableApplicationContext with refresh
+			// support or the context injected at construction time had already been
+			// refreshed -> trigger initial onRefresh manually here.
+			synchronized (this.onRefreshMonitor) {
+				onRefresh(wac);
+			}
+		}
+
+		if (this.publishContext) {
+			// Publish the context as a servlet context attribute.
+			String attrName = getServletContextAttributeName();
+			getServletContext().setAttribute(attrName, wac);
+		}
+
+		return wac;
+	}
+```
+
+
+
+DispatcherServlet#onRefresh(ApplicationContext context)
+
+```java
+@Override
+protected void onRefresh(ApplicationContext context) {
+	initStrategies(context);
+}
+```
+
+```java
+protected void initStrategies(ApplicationContext context) {
+   initMultipartResolver(context);
+   initLocaleResolver(context);
+   initThemeResolver(context);
+   initHandlerMappings(context);
+   initHandlerAdapters(context);
+   initHandlerExceptionResolvers(context);
+   initRequestToViewNameTranslator(context);
+   initViewResolvers(context);
+   initFlashMapManager(context);
+}
+```
+
+```java
+private void initHandlerMappings(ApplicationContext context) {
+		this.handlerMappings = null;
+
+		if (this.detectAllHandlerMappings) {
+			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			Map<String, HandlerMapping> matchingBeans =
+					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+			if (!matchingBeans.isEmpty()) {
+				this.handlerMappings = new ArrayList<>(matchingBeans.values());
+				// We keep HandlerMappings in sorted order.
+				AnnotationAwareOrderComparator.sort(this.handlerMappings);
+			}
+		}
+		else {
+			try {
+				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
+				this.handlerMappings = Collections.singletonList(hm);
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// Ignore, we'll add a default HandlerMapping later.
+			}
+		}
+
+		// Ensure we have at least one HandlerMapping, by registering
+		// a default HandlerMapping if no other mappings are found.
+		if (this.handlerMappings == null) {
+			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No HandlerMappings declared for servlet '" + getServletName() +
+						"': using default strategies from DispatcherServlet.properties");
+			}
+		}
+	}
+```
+
+
+
 ### 三、执行 service 方法
 
 1.HttpServlet#service()
