@@ -4,7 +4,7 @@
 
 ![1629272246204](assets\1629272246204.png)
 
-
+![1629339329617](assets\1629339329617.png)
 
 ### 一、执行 Servlet 构造器方法 
 
@@ -182,6 +182,7 @@ protected WebApplicationContext initWebApplicationContext() {
 			// support or the context injected at construction time had already been
 			// refreshed -> trigger initial onRefresh manually here.
 			synchronized (this.onRefreshMonitor) {
+                 //很重要的一个方法,执行DispatcherServlet的一些初始化工作
 				onRefresh(wac);
 			}
 		}
@@ -197,6 +198,153 @@ protected WebApplicationContext initWebApplicationContext() {
 ```
 
 
+
+FrameworkServlet#createWebApplicationContext(@Nullable WebApplicationContext parent)
+
+```java
+protected WebApplicationContext createWebApplicationContext(@Nullable WebApplicationContext parent) {
+   return createWebApplicationContext((ApplicationContext) parent);
+}
+```
+
+FrameworkServlet#createWebApplicationContext(@Nullable ApplicationContext parent)
+
+```java
+protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
+    //XmlWebApplicationContext.class
+   Class<?> contextClass = getContextClass();
+   if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
+      throw new ApplicationContextException(
+            "Fatal initialization error in servlet with name '" + getServletName() +
+            "': custom WebApplicationContext class [" + contextClass.getName() +
+            "] is not of type ConfigurableWebApplicationContext");
+   }
+   //实例化XmlWebApplicationContext对象  
+   ConfigurableWebApplicationContext wac =
+         (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
+   
+   wac.setEnvironment(getEnvironment());
+   wac.setParent(parent);
+   String configLocation = getContextConfigLocation();
+   if (configLocation != null) {
+      wac.setConfigLocation(configLocation);
+   }
+   //向ApplicationContext设置初始值
+   configureAndRefreshWebApplicationContext(wac);
+
+   return wac;
+}
+```
+
+
+
+FrameworkServlet#configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac)
+
+```java
+protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac) {
+   if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
+      // The application context id is still set to its original default value
+      // -> assign a more useful id based on available information
+      if (this.contextId != null) {
+         wac.setId(this.contextId);
+      }
+      else {
+         // Generate default id...
+         wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+               ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName());
+      }
+   }
+
+   wac.setServletContext(getServletContext());
+   wac.setServletConfig(getServletConfig());
+   wac.setNamespace(getNamespace());
+   wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
+
+   // The wac environment's #initPropertySources will be called in any case when the context
+   // is refreshed; do it eagerly here to ensure servlet property sources are in place for
+   // use in any post-processing or initialization that occurs below prior to #refresh
+   ConfigurableEnvironment env = wac.getEnvironment();
+   if (env instanceof ConfigurableWebEnvironment) {
+      ((ConfigurableWebEnvironment) env).initPropertySources(getServletContext(), getServletConfig());
+   }
+
+   postProcessWebApplicationContext(wac);
+   applyInitializers(wac);
+   //跟Spring相关联
+   wac.refresh();
+}
+```
+
+
+
+AbstractApplicationContext#refresh()
+
+```java
+@Override
+public void refresh() throws BeansException, IllegalStateException {
+   synchronized (this.startupShutdownMonitor) {
+      // Prepare this context for refreshing.
+      prepareRefresh();
+
+      // Tell the subclass to refresh the internal bean factory.
+      ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+      // Prepare the bean factory for use in this context.
+      prepareBeanFactory(beanFactory);
+
+      try {
+         // Allows post-processing of the bean factory in context subclasses.
+         postProcessBeanFactory(beanFactory);
+
+         // Invoke factory processors registered as beans in the context.
+         invokeBeanFactoryPostProcessors(beanFactory);
+
+         // Register bean processors that intercept bean creation.
+         registerBeanPostProcessors(beanFactory);
+
+         // Initialize message source for this context.
+         initMessageSource();
+
+         // Initialize event multicaster for this context.
+         initApplicationEventMulticaster();
+
+         // Initialize other special beans in specific context subclasses.
+         onRefresh();
+
+         // Check for listener beans and register them.
+         registerListeners();
+
+         // Instantiate all remaining (non-lazy-init) singletons.
+         finishBeanFactoryInitialization(beanFactory);
+
+         // Last step: publish corresponding event.
+         finishRefresh();
+      }
+
+      catch (BeansException ex) {
+         if (logger.isWarnEnabled()) {
+            logger.warn("Exception encountered during context initialization - " +
+                  "cancelling refresh attempt: " + ex);
+         }
+
+         // Destroy already created singletons to avoid dangling resources.
+         destroyBeans();
+
+         // Reset 'active' flag.
+         cancelRefresh(ex);
+
+         // Propagate exception to caller.
+         throw ex;
+      }
+
+      finally {
+         // Reset common introspection caches in Spring's core, since we
+         // might not ever need metadata for singleton beans anymore...
+         resetCommonCaches();
+      }
+   }
+}
+```
 
 DispatcherServlet#onRefresh(ApplicationContext context)
 
