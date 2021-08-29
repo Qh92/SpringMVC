@@ -26,7 +26,7 @@
   <a href="springmvc/testPathVariable/1"> test PathVariable</a> <br/>
 
   <%-- get请求 --%>
-  <a href="springmvc/testRest/1"> test Rest Get</a> <br/>
+  <a href="springmvc/testRest/id/1/name/qinhao"> test Rest Get</a> <br/>
 
   <form action="springmvc/testRest" method="post">
     <input type="submit" value="TestRest POST">

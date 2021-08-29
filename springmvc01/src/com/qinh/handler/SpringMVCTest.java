@@ -102,9 +102,9 @@ public class SpringMVCTest {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/testRest/{id}" ,method = RequestMethod.GET)
-    public String testRest(@PathVariable Integer id){
-        System.out.println("testRest GET : " + id);
+    @RequestMapping(value = "/testRest/id/{id}/name/{name}" ,method = RequestMethod.GET)
+    public String testRest(@PathVariable Integer id,@PathVariable("name") String userName){
+        System.out.println("testRest GET : id, " + id + " name, " + userName );
         return SUCCESS;
     }
 
@@ -118,13 +118,14 @@ public class SpringMVCTest {
     @RequestMapping(value = "/testRest/{id}" ,method = RequestMethod.DELETE)
     public String testRestDelete(@PathVariable Integer id){
         System.out.println("testRest DELETE : " + id);
-        return "redirect:/springmvc/testRest/1";
+        return "redirect:/springmvc/testRest/id/1/name/qinh";
+        //return SUCCESS;
     }
 
     @RequestMapping(value = "/testRest/{id}" ,method = RequestMethod.PUT)
     public String testRestPut(@PathVariable Integer id){
         System.out.println("testRest PUT : " + id);
-        return "redirect:/springmvc/testRest/1";
+        return "redirect:/springmvc/testRest/id/1/name/qinh";
     }
 
 
