@@ -72,7 +72,7 @@
     模拟修改操作
     1. 原始数据为：1,Tom,123456,xx@gmail.com,12
     2. 密码不能被修改
-    3. 表单回显，模拟操作直接在表单填写对应的属性值
+    3. 表单回显，模拟操作直接在表单填写对应的属性值(表单上直接写死数据)
   --%>
 
   <form action="springmvc/testModelAttribute" method="post">

@@ -61,7 +61,7 @@
         Department: <form:select path="department.id" items="${departments}" itemLabel="departmentName" itemValue="id"/>
         <br/>
         <!--
-            1. 数据类型转换
+            1. 数据类型转换(String -> Date)
             2. 数据类型格式化
             3. 数据校验
             1). 如何校验? 注解?
@@ -74,7 +74,7 @@
             注意：需校验的Bean 对象和其绑定结果对象或错误对象时成对出现的，它们之间不允许声明其它的入参
             3). 错误消息? 如何显示，如何把错误信息进行国际化
         -->
-        Birth: <form:input path="birth"/>
+       <%-- Birth: <form:input path="birth"/>--%>
         <form:errors path="birth"/>
         <br/>
         Salary: <form:input path="salary"/>
