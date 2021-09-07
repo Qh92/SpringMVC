@@ -140,6 +140,5 @@ public class SpringMVCTest {
         System.out.println(" save employee : " + employee);
         employeeDao.save(employee);
         return "redirect:/emps";
-
     }
 }

@@ -29,10 +29,11 @@ public class EmployeeHandler {
     private DepartmentDao departmentDao;
 
 
-//    @InitBinder
-//    public void initBinder(WebDataBinder webDataBinder){
-//        webDataBinder.setDisallowedFields("lastName");
-//    }
+    /*@InitBinder
+    public void initBinder(WebDataBinder webDataBinder){
+        //不自动绑定lastName属性
+        webDataBinder.setDisallowedFields("lastName");
+    }*/
 
     @ModelAttribute
     public void getEmployee(@RequestParam(value = "id",required = false) Integer id,Map<String,Object> map){
