@@ -29,13 +29,14 @@
         如果该属性值也不存在，则会发生错误。
     -->
     <form:form action="${pageContext.request.contextPath}/emp" method="post" modelAttribute="employee">
-
+        <%-- *显示所有的错误信息 --%>
         <form:errors path="*"/>
         <br/>
 
         <c:if test="${employee.id == null } ">
             <!-- path 属性对应html 表单标签的name属性值 -->
             LastName: <form:input path="lastName"/>
+            <%-- path：对应字段的名称 --%>
             <form:errors path="lastName"/>
         </c:if>
         <c:if test="${employee.id != null}">
@@ -74,7 +75,7 @@
             注意：需校验的Bean 对象和其绑定结果对象或错误对象时成对出现的，它们之间不允许声明其它的入参
             3). 错误消息? 如何显示，如何把错误信息进行国际化
         -->
-       <%-- Birth: <form:input path="birth"/>--%>
+        Birth: <form:input path="birth"/>
         <form:errors path="birth"/>
         <br/>
         Salary: <form:input path="salary"/>

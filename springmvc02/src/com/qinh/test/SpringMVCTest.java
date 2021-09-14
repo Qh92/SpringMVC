@@ -97,23 +97,31 @@ public class SpringMVCTest {
     }
 
     @RequestMapping("/i18n")
-    public String testI18n(Locale locale){
+    public String testI18n(Locale locale,HttpSession session){
+        System.out.println(session);
         String message = resourceBundleMessageSource.getMessage("i18n.user", null, locale);
         System.out.println(message);
         return "i18n";
     }
 
 
+    /**
+     * 返回ResponseEntity对象，模拟文件下载的效果
+     *
+     * @param session
+     * @return
+     * @throws IOException
+     */
     @RequestMapping("/testResponseEntity")
     public ResponseEntity<byte[]> testResponseEntity(HttpSession session) throws IOException {
         ServletContext servletContext = session.getServletContext();
-        InputStream in = servletContext.getResourceAsStream("/file/连接池配置.txt");
+        InputStream in = servletContext.getResourceAsStream("/file/gc.log");
 
         byte[] body = new byte[in.available()];
         in.read(body);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition","attachment;filename=连接池配置.txt");
+        headers.add("Content-Disposition","attachment;filename=gc.log");
 
         HttpStatus statusCode = HttpStatus.OK;
 
@@ -122,6 +130,15 @@ public class SpringMVCTest {
         return reponse;
     }
 
+    /**
+     * 请求报文 -> HttpInputMessage -> HttpMessageConverter -> java对象
+     * java对象 -> HttpMessageConverter -> HttpOutputMessage -> 响应报文
+     *
+     * @RequestBody：修饰目标方法入参
+     *
+     * @param body
+     * @return
+     */
     @ResponseBody
     @RequestMapping("/testHttpMessageConverter")
     public String testHttpMessageConverter(@RequestBody String body){

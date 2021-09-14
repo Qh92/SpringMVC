@@ -34,6 +34,7 @@
 
     <a href="testJson" id="testJson">Test Json</a> <br/>
 
+    <%-- 文件上传的效果 --%>
     <form action="testHttpMessageConverter" method="post" enctype="multipart/form-data">
       File: <input type="file" name="file">
       Desc: <input type="text" name="desc">
@@ -45,7 +46,7 @@
 
     <%--
       关于国际化：
-      1. 在页面上能够根据浏览器语言设置的情况对文本(不是内容)，时间，数值进行本地化处理
+      1. 在页面上能够根据浏览器语言设置的情况对文本(不是内容，而是例如，lastName,password,email等)，时间，数值进行本地化处理
       2. 可以在bean中获取国际化资源文件locale对应的消息
       3. 可以通过超链接切换Locale，而不再依赖于浏览器的语言设置情况
 
