@@ -58,13 +58,13 @@ public class SpringMVCTest {
         return "success";
     }
 
-//	@ExceptionHandler({RuntimeException.class})
-//	public ModelAndView handleArithmeticException2(Exception ex){
-//		System.out.println("[出异常了]: " + ex);
-//		ModelAndView mv = new ModelAndView("error");
-//		mv.addObject("exception", ex);
-//		return mv;
-//	}
+	/*@ExceptionHandler({RuntimeException.class})
+	public ModelAndView handleArithmeticException2(Exception ex){
+		System.out.println("[出异常了]: " + ex);
+		ModelAndView mv = new ModelAndView("error");
+		mv.addObject("exception", ex);
+		return mv;
+	}*/
 
     /**
      * 1. 在 @ExceptionHandler 方法的入参中可以加入 Exception 类型的参数, 该参数即对应发生的异常对象
@@ -73,13 +73,13 @@ public class SpringMVCTest {
      * 4. @ControllerAdvice: 如果在当前 Handler 中找不到 @ExceptionHandler 方法来出来当前方法出现的异常,
      * 则将去 @ControllerAdvice 标记的类中查找 @ExceptionHandler 标记的方法来处理异常.
      */
-//	@ExceptionHandler({ArithmeticException.class})
-//	public ModelAndView handleArithmeticException(Exception ex){
-//		System.out.println("出异常了: " + ex);
-//		ModelAndView mv = new ModelAndView("error");
-//		mv.addObject("exception", ex);
-//		return mv;
-//	}
+	/*@ExceptionHandler({ArithmeticException.class})
+	public ModelAndView handleArithmeticException(Exception ex){
+		System.out.println("出异常了: " + ex);
+		ModelAndView mv = new ModelAndView("error");
+		mv.addObject("exception", ex);
+		return mv;
+	}*/
 
     @RequestMapping("/testExceptionHandlerExceptionResolver")
     public String testExceptionHandlerExceptionResolver(@RequestParam("i") int i){

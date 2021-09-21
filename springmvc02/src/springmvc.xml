@@ -88,7 +88,7 @@
         <property name="maxUploadSize" value="1024000"/>
     </bean>
 
-    <!-- 配置使用 SimpleMappingExceptionResolver 来映射异常 -->
+    <!-- 配置使用 SimpleMappingExceptionResolver 来对所有异常进行统一处理 -->
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <property name="exceptionAttribute" value="ex"/>
         <property name="exceptionMappings">
