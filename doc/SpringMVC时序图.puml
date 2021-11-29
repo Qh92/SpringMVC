@@ -1,0 +1,21 @@
+@startuml
+Client -> DispatcherServlet: 1.doDispatch(),请求调用入口
+DispatcherServlet --> DispatcherServlet: 2.getHandler(),根据请求获取对应的handler
+DispatcherServlet -> HandlerExecutionChain:3.applyPreHandle(),如果配置了拦截器,执行拦截器的前置处理
+DispatcherServlet -> AbstractHandlerMethodAdapter: 4.handle(),执行具体的handler方法
+AbstractHandlerMethodAdapter --> AbstractHandlerMethodAdapter: 5.handleInternal(),调用钩子方法
+AbstractHandlerMethodAdapter -> RequestMappingHandlerAdapter: 6.handleInternal(),具体方法
+RequestMappingHandlerAdapter --> RequestMappingHandlerAdapter: 7.invokeHandlerMethod(),执行handler对应的方法
+RequestMappingHandlerAdapter -> ServletInvocableHandlerMethod: 8.invokeAndHandle(),执行实际的handler对应的方法,并将结果（视图）封装为ModelAndViewContainer类型
+RequestMappingHandlerAdapter --> RequestMappingHandlerAdapter: 9.getModelAndView(),获取结果视图
+RequestMappingHandlerAdapter -> AbstractHandlerMethodAdapter: 9.返回ModelAndView对象
+AbstractHandlerMethodAdapter -> DispatcherServlet: 10.返回ModelAndView对象
+DispatcherServlet -> HandlerExecutionChain: 11.applyPostHandle(),如果配置了拦截器,执行拦截器的后置处理
+DispatcherServlet --> DispatcherServlet: 12.processDispatchResult(),处理返回的视图或异常
+DispatcherServlet --> DispatcherServlet: 13.render(),解析ModelAndView对象为View对象
+DispatcherServlet -> AbstractView: 14.render(),渲染视图，将mode数据转为response响应
+AbstractView -> Client
+
+
+
+@enduml
