@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!-- 配置扫描的包 -->
+    <!--<context:component-scan base-package="com.qinh"/>-->
+
+    <!-- 在父容器中不扫描@Controller注解，在子容器中只扫描@Controller注解 -->
+    <!--把控制器从包扫描中排除出去-->
+    <context:component-scan base-package="com.qinh">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 在实际开发中通常都需要配置 mvc:annotation-driven 标签 -->
+    <!--注解驱动，以使得访问路径与方法的匹配可以通过注解配置-->
+    <mvc:annotation-driven/>
+
+
+</beans>
